@@ -1,11 +1,11 @@
 package util
 
 import (
-//"testing"
+	"testing"
 )
 
 func ExampleDebug() {
-	SetDebugLevel(DebugNull)
+	SetDebugLevel(DebugOff)
 	Debug("Test Debug/Null => KO")
 
 	SetDebugLevel(DebugFatal)
@@ -27,7 +27,7 @@ func ExampleDebug() {
 }
 
 func ExampleInfo() {
-	SetDebugLevel(DebugNull)
+	SetDebugLevel(DebugOff)
 	Info("Test Info/Null => KO")
 
 	SetDebugLevel(DebugFatal)
@@ -50,7 +50,7 @@ func ExampleInfo() {
 }
 
 func ExampleWarning() {
-	SetDebugLevel(DebugNull)
+	SetDebugLevel(DebugOff)
 	Warning("Test Warning/Null => KO")
 
 	SetDebugLevel(DebugFatal)
@@ -74,7 +74,7 @@ func ExampleWarning() {
 }
 
 func ExampleError() {
-	SetDebugLevel(DebugNull)
+	SetDebugLevel(DebugOff)
 	Error("Test Error/Null => KO")
 
 	SetDebugLevel(DebugFatal)
@@ -97,4 +97,22 @@ func ExampleError() {
 	// [ Error   ]: Test Error/Warning => OK
 	// [ Error   ]: Test Error/Info => OK
 	// [ Error   ]: Test Error/Debug => OK
+}
+
+func TestLogWithoutSetDebugLevel(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			t.Error("panic occurs, check if stream is nil")
+		}
+	}()
+
+	// reset debugger
+	if gDebug.stream != nil {
+		gDebug.stream.Close()
+	}
+	gDebug = debugger{}
+	Debug("")
+	Info("")
+	Warning("")
+	Error("")
 }

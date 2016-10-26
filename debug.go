@@ -27,34 +27,30 @@ type debugger struct {
 }
 
 const (
-	DebugNull    DebugLevel = 0
-	DebugFatal   DebugLevel = 1
-	DebugError   DebugLevel = 2
-	DebugWarning DebugLevel = 3
-	DebugInfo    DebugLevel = 4
-	DebugDebug   DebugLevel = 5
+	DebugOff DebugLevel = iota
+	DebugFatal
+	DebugError
+	DebugWarning
+	DebugInfo
+	DebugDebug
 )
 
 var gDebug debugger
 
-func initStream() {
+// SetDebugLevel changes the debug level, default value is DebugOff
+// it's safe to call this function multiple times
+func SetDebugLevel(d DebugLevel) {
+	if d < DebugOff || d > DebugDebug {
+		panic("illegal debug value")
+	}
+	gDebug.level = d
 	if gDebug.stream == nil {
 		gDebug.stream = new(stdoutStream)
 	}
 }
 
-// SetDebugLevel changes the debug level, default value is DebugNull
-// it's safe to call this function multiple times
-func SetDebugLevel(d DebugLevel) {
-	if d < DebugNull || d > DebugDebug {
-		panic("illegal debug value")
-	}
-	gDebug.level = d
-}
-
 // Fatal writes message and call osExit
 func Fatal(fmts string, args ...interface{}) {
-	initStream()
 	gDebug.stream.Log(DebugFatal, fmt.Sprintf(fmts, args...))
 	gDebug.stream.Close()
 	os.Exit(-1)
@@ -62,7 +58,6 @@ func Fatal(fmts string, args ...interface{}) {
 
 // Error writes message if debug level is larger or equal than DebugError
 func Error(fmts string, args ...interface{}) {
-	initStream()
 	if gDebug.level >= DebugError {
 		gDebug.stream.Log(DebugError, fmt.Sprintf(fmts, args...))
 	}
@@ -70,7 +65,6 @@ func Error(fmts string, args ...interface{}) {
 
 // Warning writes message if debug level is larger or equal than DebugWarning
 func Warning(fmts string, args ...interface{}) {
-	initStream()
 	if gDebug.level >= DebugWarning {
 		gDebug.stream.Log(DebugWarning, fmt.Sprintf(fmts, args...))
 	}
@@ -78,7 +72,6 @@ func Warning(fmts string, args ...interface{}) {
 
 // Info writes message if debug level is larger or equal than DebugInfo
 func Info(fmts string, args ...interface{}) {
-	initStream()
 	if gDebug.level >= DebugInfo {
 		gDebug.stream.Log(DebugInfo, fmt.Sprintf(fmts, args...))
 	}
@@ -86,7 +79,6 @@ func Info(fmts string, args ...interface{}) {
 
 // Debug writes message if debug level is larger or equal than DebugDebug
 func Debug(fmts string, args ...interface{}) {
-	initStream()
 	if gDebug.level >= DebugDebug {
 		gDebug.stream.Log(DebugDebug, fmt.Sprintf(fmts, args...))
 	}
