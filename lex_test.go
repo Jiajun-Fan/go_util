@@ -7,45 +7,31 @@ import (
 )
 
 func TestLex(t *testing.T) {
-	data := []byte("t测试 成功了庆祝一下\n")
+	data := []byte("t测试aa bbccc \n")
 	lex := NewLex(bytes.NewReader(data))
-	if s, _ := lex.Peek(); s != "t" {
-		t.Error()
+	if s, _ := lex.Peek(1); s != "t" {
+		t.Error(s)
 	}
-	if s, _ := lex.Peek(); s != "测" {
-		t.Error()
+	if s, _ := lex.Peek(1); s != "测" {
+		t.Error(s)
 	}
-	if s, _ := lex.Peek(); s != "试" {
-		t.Error()
+	if s, _ := lex.Peek(1); s != "试" {
+		t.Error(s)
 	}
-	if lex.Buffer() != "t测试" {
-		t.Error()
+	if s, _ := lex.Read(); s != "t测试" {
+		t.Error(s)
 	}
-	lex.Next()
-	delim := []string{
-		" ",
-		"",
-		"了",
-		"庆祝",
-		"\n",
+	if s, _ := lex.Peek(3); s != "aa " {
+		t.Error(s)
 	}
-	if s, _ := lex.PeekUntil(delim); s != " " {
-		t.Error()
+	delim := []byte("b\n")
+	if s, _ := lex.ReadString(delim[0]); s != "aa b" {
+		t.Error(s)
 	}
-	if s, _ := lex.PeekUntil(delim); s != "成功了" {
-		t.Error()
+	if s, _ := lex.ReadString(delim[1]); s != "bccc \n" {
+		t.Error(s)
 	}
-	if s, _ := lex.PeekUntil(delim); s != "庆" {
-		t.Error()
+	if _, err := lex.Peek(1); err != io.EOF {
+		t.Error(err)
 	}
-	if s, _ := lex.PeekUntil(delim); s != "祝一下\n" {
-		t.Error()
-	}
-	if s, err := lex.Peek(); err != io.EOF || s != "" {
-		t.Error()
-	}
-	if lex.Buffer() != " 成功了庆祝一下\n" {
-		t.Error()
-	}
-	lex.Next()
 }
