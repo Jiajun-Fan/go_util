@@ -3,57 +3,102 @@ package util
 import (
 	"bufio"
 	"bytes"
+	"errors"
+	"fmt"
 	"io"
+	"unicode/utf8"
 )
 
-type Lex struct {
-	reader      *bufio.Reader
-	peeked_buff bytes.Buffer
-	peeked_err  error
+const kLexBufferSize = 1024 * 32
+
+var ErrLexBufferOverFlow = errors.New("lex buffer overflow")
+var ErrLexBufferUnderFlow = errors.New("lex buffer underflow")
+
+type LexRune struct {
+	r    rune
+	size int
 }
 
-// NewLex return a new Lex.
-// Caller is responsible for closing input stream.
-func NewLex(r io.Reader) *Lex {
-	if r == nil {
-		panic("nil input stream")
+type LexReader struct {
+	reader *bufio.Reader
+	buff   [kLexBufferSize]LexRune
+	ri     int
+	wi     int
+	ai     int
+	nomore bool
+}
+
+// NewLexReader returns a new LexReader
+func NewLexReader(reader io.Reader) *LexReader {
+	rd := LexReader{}
+	rd.reader = bufio.NewReader(reader)
+	return &rd
+}
+
+// Reset moves backward the read point to the last accepted place.
+func (rd *LexReader) Reset() {
+	rd.nomore = false
+	rd.ri = rd.ai
+}
+
+// Accept moves forward the read point for next n runes
+// If there is not enough runes to accept, it returns ErrLexBufferUnderFlow,
+// and nothing changes.
+func (rd *LexReader) Accept(n int) (err error) {
+	err = nil
+	if rd.ai+n > rd.wi {
+		err = ErrLexBufferUnderFlow
+	} else {
+		rd.ai += n
+		rd.Reset()
 	}
-	reader := bufio.NewReader(r)
-
-	return &Lex{reader, bytes.Buffer{}, nil}
+	return
 }
 
-// Peek returns the next n rune without advancing the lex.
-func (lex *Lex) Peek(n int) (string, error) {
+// ReadRune reads the next rune of input.
+func (rd *LexReader) ReadRune() (r rune, size int, err error) {
+	if rd.ri == rd.wi {
+		rd.nomore = true
+	}
+	fmt.Println(rd.ri, " ", rd.wi, " ", rd.ai)
+	if rd.nomore {
+		if rd.wi > rd.ri+kLexBufferSize {
+			return 0, 0, ErrLexBufferOverFlow
+		}
 
+		r, size, err = rd.reader.ReadRune()
+		if err == nil {
+			rd.buff[rd.wi%kLexBufferSize] = LexRune{r, size}
+			rd.wi++
+		}
+	} else {
+		lex_rune := rd.buff[rd.ri%kLexBufferSize]
+		r = lex_rune.r
+		size = lex_rune.size
+		err = nil
+		rd.ri++
+	}
+	return
+}
+
+// ReadString reads the next n runes and return them as string
+func (rd *LexReader) ReadString(n int) (s string, err error) {
 	buff := bytes.Buffer{}
+
+	defer func() {
+		s = buff.String()
+	}()
+
+	bs := make([]byte, utf8.UTFMax, utf8.UTFMax)
 	for i := 0; i < n; i++ {
 		var r rune
-		if r, _, lex.peeked_err = lex.reader.ReadRune(); lex.peeked_err == nil {
-			if _, lex.peeked_err = buff.WriteRune(r); lex.peeked_err != nil {
-				return "", lex.peeked_err
-			}
-		} else {
-			return buff.String(), lex.peeked_err
+		var size int
+		r, size, err = rd.ReadRune()
+		if err != nil {
+			return
 		}
+		utf8.EncodeRune(bs, r)
+		buff.Write(bs[:size])
 	}
-	_, lex.peeked_err = lex.peeked_buff.Write(buff.Bytes())
-	return buff.String(), lex.peeked_err
-}
-
-// Read returns the peeked runes and advances the lex.
-func (lex *Lex) Read() (string, error) {
-	defer lex.peeked_buff.Reset()
-	return lex.peeked_buff.String(), lex.peeked_err
-}
-
-// ReadString reads until the first occurrence of delim in unread input.
-func (lex *Lex) ReadString(delim byte) (string, error) {
-	var s string
-	if s, lex.peeked_err = lex.reader.ReadString(delim); lex.peeked_err != nil {
-		return s, lex.peeked_err
-	}
-
-	_, lex.peeked_err = lex.peeked_buff.WriteString(s)
-	return lex.Read()
+	return
 }
