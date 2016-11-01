@@ -6,8 +6,6 @@ import (
 	"io"
 )
 
-type LexToken int
-
 type Lex struct {
 	reader      *bufio.Reader
 	peeked_buff bytes.Buffer
