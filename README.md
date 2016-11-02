@@ -13,11 +13,10 @@ Package util contains some basic utilities, including
 ## Usage
 
 ```go
-var ErrLexBufferOverFlow = errors.New("lex buffer overflow")
-```
-
-```go
-var ErrLexBufferUnderFlow = errors.New("lex buffer underflow")
+var (
+	ErrLexBufferOverFlow  = errors.New("lex buffer overflow")
+	ErrLexBufferUnderFlow = errors.New("lex buffer underflow")
+)
 ```
 
 #### func  Debug
@@ -94,14 +93,14 @@ type LexReader struct {
 ```go
 func NewLexReader(reader io.Reader) *LexReader
 ```
-NewLexReader returns a new LexReader
+NewLexReader returns a new LexReader.
 
 #### func (*LexReader) Accept
 
 ```go
 func (rd *LexReader) Accept(n int) (err error)
 ```
-Accept moves forward the read point for next n runes If there is not enough
+Accept moves forward the read point for next n runes. If there is not enough
 runes to accept, it returns ErrLexBufferUnderFlow, and nothing changes.
 
 #### func (*LexReader) AcceptBytes
@@ -109,7 +108,7 @@ runes to accept, it returns ErrLexBufferUnderFlow, and nothing changes.
 ```go
 func (rd *LexReader) AcceptBytes(n int) (err error)
 ```
-Accept moves forward the read point for next n bytesj If there is not enough
+Accept moves forward the read point for next n bytes. If there is not enough
 bytes to accept, it returns ErrLexBufferUnderFlow, and nothing changes.
 
 #### func (*LexReader) ReadRune
@@ -124,7 +123,7 @@ ReadRune reads the next rune of input.
 ```go
 func (rd *LexReader) ReadString(n int) (s string, err error)
 ```
-ReadString reads the next n runes and return them as string
+ReadString reads the next n runes and return them as string.
 
 #### func (*LexReader) Reset
 
@@ -133,9 +132,28 @@ func (rd *LexReader) Reset()
 ```
 Reset moves backward the read point to the last accepted place.
 
-#### type LexRune
+#### type Token
 
 ```go
-type LexRune struct {
-}
+type Token int
+```
+
+
+```go
+const (
+	TokIllegal      Token = iota // illegal
+	TokSpace                     // blank \t
+	TokNewLine                   // \n \r\n
+	TokNumber                    // 0-9
+	TokAlphabetic                // a-zA-Z
+	TokUnderScore                // _
+	TokDot                       // .
+	TokQuota                     // "
+	TokSingleQuota               // '
+	TokLeftBracket               // [
+	TokRightBracket              // ]
+	TokHash                      // #
+	TokChar                      // everything else
+	TokEOF                       // end of file
+)
 ```

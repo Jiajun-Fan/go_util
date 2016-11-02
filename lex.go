@@ -13,10 +13,12 @@ const (
 	kLexByteBufferSize = kLexBufferSize * utf8.UTFMax
 )
 
-var ErrLexBufferOverFlow = errors.New("lex buffer overflow")
-var ErrLexBufferUnderFlow = errors.New("lex buffer underflow")
+var (
+	ErrLexBufferOverFlow  = errors.New("lex buffer overflow")
+	ErrLexBufferUnderFlow = errors.New("lex buffer underflow")
+)
 
-type LexRune struct {
+type lexRune struct {
 	r      rune
 	size   int
 	offset int
@@ -24,7 +26,7 @@ type LexRune struct {
 
 type LexReader struct {
 	reader *bufio.Reader
-	rbuff  [kLexBufferSize]LexRune
+	rbuff  [kLexBufferSize]lexRune
 	bbuff  [kLexByteBufferSize]byte
 	ri     int
 	wi     int
@@ -35,7 +37,7 @@ type LexReader struct {
 	nomore bool
 }
 
-// NewLexReader returns a new LexReader
+// NewLexReader returns a new LexReader.
 func NewLexReader(reader io.Reader) *LexReader {
 	rd := LexReader{}
 	rd.reader = bufio.NewReader(reader)
@@ -49,7 +51,7 @@ func (rd *LexReader) Reset() {
 	rd.bri = rd.bai
 }
 
-// Accept moves forward the read point for next n runes
+// Accept moves forward the read point for next n runes.
 // If there is not enough runes to accept, it returns ErrLexBufferUnderFlow,
 // and nothing changes.
 func (rd *LexReader) Accept(n int) (err error) {
@@ -64,7 +66,7 @@ func (rd *LexReader) Accept(n int) (err error) {
 	return
 }
 
-// Accept moves forward the read point for next n bytesj
+// Accept moves forward the read point for next n bytes.
 // If there is not enough bytes to accept, it returns ErrLexBufferUnderFlow,
 // and nothing changes.
 func (rd *LexReader) AcceptBytes(n int) (err error) {
@@ -108,7 +110,7 @@ func (rd *LexReader) ReadRune() (r rune, size int, err error) {
 
 		r, size, err = rd.reader.ReadRune()
 		if err == nil {
-			rd.rbuff[rd.wi%kLexBufferSize] = LexRune{r, size, rd.bwi}
+			rd.rbuff[rd.wi%kLexBufferSize] = lexRune{r, size, rd.bwi}
 			rd.wi++
 			rd.ri++
 			if rd.bwi+utf8.UTFMax > kLexByteBufferSize {
@@ -134,7 +136,7 @@ func (rd *LexReader) ReadRune() (r rune, size int, err error) {
 	return
 }
 
-// ReadString reads the next n runes and return them as string
+// ReadString reads the next n runes and return them as string.
 func (rd *LexReader) ReadString(n int) (s string, err error) {
 
 	before := rd.bri
