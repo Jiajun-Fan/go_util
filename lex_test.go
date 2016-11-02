@@ -2,7 +2,7 @@ package util
 
 import (
 	"bytes"
-	"fmt"
+	"io"
 	"regexp"
 	"testing"
 )
@@ -40,32 +40,23 @@ func TestLexReader(t *testing.T) {
 	if group == nil || len(group) != 4 {
 		t.Error(group)
 	}
-	fmt.Println(group)
-	if err := lex.Accept(group[3]); err != nil {
+	if err := lex.AcceptBytes(group[1]); err != nil {
 		t.Error(err)
 	}
 	group = re2.FindReaderSubmatchIndex(lex)
 	if group == nil || len(group) != 6 {
-		//if group := re1.FindReaderSubmatchIndex(lex); group == nil || len(group) != 6 {
 		t.Error(group)
 	}
-	fmt.Println(group)
-
-	/*if !re1.MatchReader(lex) {
-	}
-	fmt.Println(lex.ReadString(7))
-	if !re2.MatchReader(lex) {
-		t.Error()
-	}*/
-
-	/*delim := []byte("b\n")
-	if s, _ := lex.ReadString(delim[0]); s != "aa b" {
-		t.Error(s)
-	}
-	if s, _ := lex.ReadString(delim[1]); s != "bccc \n" {
-		t.Error(s)
-	}
-	if _, err := lex.Peek(1); err != io.EOF {
+	if err := lex.AcceptBytes(group[1]); err != nil {
 		t.Error(err)
-	}*/
+	}
+	if s, _ := lex.ReadString(1); s != " " {
+		t.Error(s)
+	}
+	if s, _ := lex.ReadString(1); s != "\n" {
+		t.Error(s)
+	}
+	if _, err := lex.ReadString(1); err != io.EOF {
+		t.Error(err)
+	}
 }
