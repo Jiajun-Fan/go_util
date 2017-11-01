@@ -219,3 +219,4 @@ func MakeDecryptor(config EncryptConfig, reader *bufio.Reader) Decryptor {
         Fatal(fmt.Sprintf("decryptor type '%s' is not implemented", config.Type))
     }
     return nil
+}
