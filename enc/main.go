@@ -9,9 +9,9 @@ import (
 
 func parseArgs() EncryptConfig {
 	config := EncryptConfig{}
-	pt := flag.String("type", "aes", "encrypt/decrypt type")
-	pk := flag.String("key", "ok", "encrypt/decrypt key")
-	pe := flag.Bool("dec", false, "decrypt mode")
+	pt := flag.String("t", "aes", "encrypt/decrypt type")
+	pk := flag.String("k", "ok", "encrypt/decrypt key")
+	pe := flag.Bool("d", false, "decrypt mode")
 	flag.Parse()
 	config.Type = *pt
 	config.Key = *pk

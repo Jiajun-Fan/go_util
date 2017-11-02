@@ -7,15 +7,23 @@ import (
 	"os"
 )
 
-func parseArgs() EncryptConfig {
-	config := EncryptConfig{}
-	pt := flag.String("type", "aes", "encrypt/decrypt type")
-	pk := flag.String("key", "ok", "encrypt/decrypt key")
-	pe := flag.Bool("dec", false, "decrypt mode")
+func parseArgs() OssConfig {
+	config := OssConfig{}
+	pt := flag.String("t", "aliyun", "cloud storage provider")
+	pk := flag.String("k", "ok", "API key")
+	ps := flag.String("s", "ok", "API secret")
+	pb := flag.String("b", "ok", "bucket name")
+	pf := flag.String("f", "ok", "file name")
+	pe := flag.String("e", "ok", "API end point")
+	pw := flag.Bool("w", false, "write mode")
 	flag.Parse()
 	config.Type = *pt
 	config.Key = *pk
-	config.Enc = !*pe
+	config.Secret = *ps
+	config.Bucket = *pb
+	config.FileName = *pf
+	config.EndPoint = *pe
+	config.Write = *pw
 	return config
 }
 
@@ -46,19 +54,13 @@ func main() {
 
 	reader := bufio.NewReader(os.Stdin)
 	writer := bufio.NewWriter(os.Stdout)
+	oss := MakeOss(config)
 
-	if config.Enc {
-		enc := MakeEncryptor(config, writer)
-
-		pipe(reader, enc)
-
-		enc.Close()
+	if config.Write {
+		pipe(reader, oss)
 	} else {
-		dec := MakeDecryptor(config, reader)
-
-		pipe(dec, writer)
-
-		dec.Close()
+		pipe(oss, writer)
 	}
+	oss.Close()
 	writer.Flush()
 }
