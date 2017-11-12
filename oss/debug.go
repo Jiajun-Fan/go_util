@@ -52,7 +52,6 @@ func (d Debugger) Printf(fmts string, args ...interface{}) {
 
 func Fatal(fmts string, args ...interface{}) {
 	gDebug.V(DebugFatal).Printf(fmts, args...)
-	println("fuck")
 	os.Exit(-1)
 }
 

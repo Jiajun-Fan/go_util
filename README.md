@@ -34,3 +34,22 @@ Usage of ./oss:
         cloud storage provider (default "aliyun")
   -w    write mode
 ```
+
+icrop
+=============================
+Read input image and crop it using specified rect and write it output file.
+```
+Usage of /home/ubuntu/icrop:
+  -a int
+        X min
+  -b int
+        Y min
+  -c int
+        X max (default 1)
+  -d int
+        Y max (default 1)
+  -i string
+        input file name (default "ok")
+  -o string
+        output file name (default "ok_output")
+```
