@@ -53,3 +53,18 @@ Usage of /home/ubuntu/icrop:
   -o string
         output file name (default "ok_output")
 ```
+
+iresize
+=============================
+resize a image
+```
+Usage of /Users/fanjiajun/iresize:
+  -h int
+    	height (default 256)
+  -i string
+    	input file name (default "ok")
+  -o string
+    	output file name (default "ok_output")
+  -w int
+    	width (default 256)
+```
