@@ -68,3 +68,22 @@ Usage of /Users/fanjiajun/iresize:
   -w int
     	width (default 256)
 ```
+
+irotate
+=============================
+rotate a image
+```
+Usage of ./irotate:
+  -i string
+    	input file name (default "ok")
+  -o string
+    	output file name (default "ok_output")
+  -p float
+    	angle (default 1)
+  -s int
+    	size (default 1)
+  -x int
+    	center x (default 1)
+  -y int
+    	center y (default 1)
+```
