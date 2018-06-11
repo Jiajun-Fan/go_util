@@ -54,7 +54,7 @@ func rotate(config RotateConfig) {
 		sim := imaging.Crop(lim, image.Rect(config.X-fout, config.Y-fout, config.X+fout, config.Y+fout))
 		rim := imaging.Rotate(sim, config.Angle, color.Black)
 
-		dst := imaging.CropCenter(rim, config.Size, config.Size)
+		dst := imaging.CropCenter(rim, config.Size*2, config.Size*2)
 
 		if err1 := imaging.Save(dst, config.Output); err1 != nil {
 			Fatal(fmt.Sprintf("can't save image %s\n", config.Output))
